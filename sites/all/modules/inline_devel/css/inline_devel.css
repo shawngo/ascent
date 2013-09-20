@@ -1,0 +1,25 @@
+#devel-execute-form #edit-code {
+  height: 200px;
+}
+
+.bordered {
+  background: #f5fcff;
+  border: #4388ab solid 1px;
+  color: #052535;
+  font-size: 17px;
+  height: 220px;
+  overflow: scroll;
+}
+
+.bordered div {
+  padding: 10px;
+}
+
+.selected-function {
+  background: #e3f1f8;
+  border: #adbac1 solid 1px;
+  border-left: none;
+  border-right: none;
+  padding-bottom: 9px;
+  padding-top: 9px;
+}

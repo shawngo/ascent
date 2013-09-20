@@ -1,0 +1,770 @@
+<?php
+/**
+ * @file
+ * The main CI Design module. Contains site-wide functions.
+ */
+
+/**
+ * Implements hook_menu().
+ * 
+ * @return array
+ *  - Menu items 
+ */
+function cidesign_menu() {
+  
+  $items = array();
+  
+  $items['admin/ascent'] = array(
+  'title' => t('Ascent Building'),
+  'description' => t("Ascent Building Administration"),
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('cidesign_style_form'),
+  'access callback' => 'user_access',
+  'access arguments' => array('administer ascent'),
+  'file' => 'ascent.admin.inc',
+  'weight' => -89,
+  'expanded' => TRUE,
+  'type' => MENU_NORMAL_ITEM,);
+  
+  $items['admin/ascent/default'] = array(
+  'title' => t('Ascent Building'),
+  'type' => MENU_DEFAULT_LOCAL_TASK);
+  
+  $items['admin/ascent/featured-homes'] = array(
+  'title' => t('Featured Homes'),
+  'description' => t("Featured Homes Administration"),
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('cidesign_featured_homes_form'),
+  'access callback' => 'user_access',
+  'access arguments' => array('administer ascent'),
+  'file' => 'ascent.admin.inc',
+  'parent' => 'admin',
+  'expanded' => TRUE,
+  'type' => MENU_NORMAL_ITEM);    
+
+  $items['admin/clear_cache'] = array(
+  'title' => 'Clear Cache',
+  'description' => 'Flush all cache.',
+  'page callback' => '_cidesign_clear_cache',
+  'access callback' => 'user_access',	 
+  'access arguments' => array('administer site configuration'),
+  'weight' => -99,);
+  
+  $items['featured-homes'] = array(
+  'title' => t('Featured Homes'),
+  'description' => t("Our Featured Homes"),
+  'page callback' => 'ascent_featured_homes',
+  //'page arguments' => array('cidesign_featured_homes_form'),
+  'access callback' => TRUE, // 'user_access',
+  //'access arguments' => array('administer ascent'),
+  'file' => 'ascent.pages.inc',
+  'parent' => 'main-navigation',
+  'expanded' => TRUE,
+  'type' => MENU_NORMAL_ITEM);
+  
+  $items['featured-videos/%ctools_js/%'] = array(
+  'title' => t('Title'),  
+  'page callback' => '_cidesign_view_featured_video',
+  'page arguments' => array(1, 2),
+  'access callback' => TRUE,
+  //'access arguments' => array('access content'),
+  'type' => MENU_CALLBACK,);
+  
+  $items['testimonials/%ctools_js/%'] = array(
+  'title' => t('Title'),  
+  'page callback' => '_cidesign_view_home_testimonials',
+  'page arguments' => array(1, 2),
+  'access callback' => TRUE,
+  //'access arguments' => array('access content'),
+  'type' => MENU_CALLBACK,);  
+  
+  $items['details-gallery'] = array(
+  'title' => t('Details Gallery'),  
+  'page callback' => '_cidesign_ascent_details_gallery_page',
+  //'page arguments' => array(1, 2),
+  'access callback' => TRUE,
+  //'access arguments' => array('access content'),
+  'type' => MENU_NORMAL_ITEM);  
+
+  $items['contact-us/%ctools_js'] = array(
+      'title' => 'Login',
+      'page callback' => 'cidesign_contact_us',
+      'page arguments' => array(1),
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
+  );
+
+  return $items;  
+}
+
+/**
+ * Implement hook_permission().
+ */
+function cidesign_permission() {
+  return array(
+    'administer ascent' => array(
+      'title' => t('Administer Ascent Building'), 
+      'description' => t('Access to the Ascent Building content administration.'),
+    ),	 
+  );
+}
+
+/**
+ * A modal form callback.
+ */
+function _cidesign_view_featured_video($js = NULL, $nid = NULL) {
+  // Fall back if $js is not set.
+  
+  $sql = db_query("SELECT t.field_video_image_fid AS fid, u.field_video_link_value AS url, n.title, n.nid
+  FROM node n
+  INNER JOIN field_data_field_video_image t ON n.nid = t.entity_id
+  INNER JOIN field_data_field_video_link u ON n.nid = u.entity_id
+  WHERE t.field_video_image_fid IS NOT NULL AND n.nid = :nid", array(':nid' => $nid))->fetchAll();
+  
+  if ($sql) {
+    $r = $sql[0];
+    if (substr($r->url, 0, 5) == 'http:') {
+      $src = substr($r->url, 5);
+    } else {
+      $src = $r->url;    
+    }  
+  }
+  
+  // www.youtube.com/embed/ehnzfGP6sq4
+  $embed = '<iframe width="560" height="315" src="' . $src . '" frameborder="0" allowfullscreen></iframe>';  
+  
+  if (!$js) {
+    return array('#markup' => $embed);
+  }
+
+  ctools_include('modal');
+  ctools_include('ajax');
+  $output = array();
+  $output[] = ctools_modal_command_display(t('Video'), $embed);
+
+  print ajax_render($output);
+  exit;
+}
+
+/**
+ * A modal form callback.
+ */
+function _cidesign_view_home_testimonials($js = NULL, $nid = NULL) {
+  
+  // Fall back if $js is not set.
+  
+  $node = node_load($nid);
+
+  if (!$js) {
+    return array('#markup' => $node->field_home_testimonial['und'][0]['value']);
+  }
+
+  ctools_include('modal');
+  ctools_include('ajax');
+  $output = array();
+  $output[] = ctools_modal_command_display(t('Testimonial'), $node->field_home_testimonial['und'][0]['value']);
+
+  print ajax_render($output);
+  exit;
+}
+
+/**
+ * A modal login callback.
+ */
+function cidesign_contact_us($js = NULL) {
+  // Fall back if $js is not set.
+  module_load_include('inc', 'contact', 'contact.pages');   
+  
+  if (!$js) {
+    return drupal_get_form('contact_site_form');
+  }
+
+  ctools_include('modal');
+  ctools_include('ajax');
+  
+  $form_state = array(
+    'title' => t('Contact Us'),
+    'ajax' => TRUE,
+    'cid' => 1
+  );
+
+ 
+  $output = ctools_modal_form_wrapper('contact_site_form', $form_state);
+  
+  if (!empty($form_state['executed'])) {
+    // We'll just overwrite the form output if it was successful.
+    $commands[] = ctools_modal_command_dismiss();
+    print ajax_render($commands);
+    exit;    
+  }
+  
+  print ajax_render($output);
+  exit;
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function cidesign_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == 'contact_site_form') {
+  
+    $form['name']['#title'] = 'Name';
+    $form['mail']['#title'] = 'Email';  
+    $form['phone'] = array('#type' => 'textfield',
+         '#title' => 'Phone',
+         '#maxlength' => 32,
+         '#default_value' => '',
+         '#required' => 1); 
+    $form['subject']['#value'] = 'Website feedback';
+    $form['subject']['#type'] = 'hidden';
+    $form['cid']['#value'] = 1;
+    $form['cid']['#type'] = 'hidden';
+    $form['message']['#title'] = 'Comments';
+    $form['packages'] = array(
+         '#type' => 'checkboxes',
+         '#title' => "I'm interested in information on:",
+         '#options' => array(2 => 'Ascent Custom Homes',1 => 'House & Lot Packages',),
+         '#required' => FALSE);
+    $form['preferred_contact'] = array(
+         '#type' => 'checkboxes',
+         '#title' => "Please contact me via:",
+         '#options' => array('Phone' => 'Phone', 'Email' => 'Email'),
+         '#required' => FALSE);
+
+    unset($form['copy']);
+  
+  }
+
+  if ($form_id == 'home_node_form') {
+    
+    $form['actions']['submit']['#submit'][] = 'cidesign_home_form_submit';
+    //  return $form;
+    //  print_r($form);
+    /*
+    $form['form_dump'] = array(
+    '#type'				=> 'fieldset',
+    '#collapsed'		=> TRUE,
+    '#collapsible'	=> TRUE,
+    '#title'			=> t('Form'),
+    '#tree'				=> TRUE);
+    
+    $form['form_dump']['msg'] = array(
+    '#markup'		=> print_r($form, TRUE),
+    '#prefix'		=> '<pre>',
+    '#suffix'		=> '</pre>');
+    
+    $form['form_state_dump'] = array(
+    '#type'				=> 'fieldset',
+    '#collapsed'		=> TRUE,
+    '#collapsible'	=> TRUE,
+    '#title'			=> t('Form State'),
+    '#tree'				=> TRUE);
+    
+    $form['form_state_dump']['msg'] = array(
+    '#markup'		=> print_r($form_state, TRUE),
+    '#prefix'		=> '<pre>',
+    '#suffix'		=> '</pre>');
+    */    
+// [field_image_settings][und][0]
+
+// ['#columns'][0]['composed']
+/*
+    for ($i = 0; $i < count($form['field_image_settings']['und']); $i++){
+      $element = $form['field_image_settings']['und'][$i];
+      
+      $element['composed'][1] = array('#upload_location' => 'public://',  
+	   '#upload_validators' => array(
+	   	'file_validate_size' => array(0 => '33554432'),
+	   	'file_validate_extensions' => array(0 => 'png gif jpg jpeg'),
+	   ),
+	   '#process' => array(0 => 'file_managed_file_process', 1 => 'file_field_widget_process', 2 => 'image_field_widget_process'),
+	   '#progress_indicator' => 'throbber',
+	   '#extended' => 1,
+	   '#value_callback' => 'file_field_widget_value');
+	   $element['composed'][1]['#default_value'] = array('fid' => 0);
+	   
+	   $form['field_image_settings']['und'][$i] = $element;
+
+    }*/
+  }
+}
+
+function cidesign_home_form_submit($form, &$form_state) {
+  // When using the #managed_file form element the file is automatically
+  // uploaded an saved to the {file} table. The value of the corresponding
+  // form element is set to the {file}.fid of the new file.
+
+  // var_dump($form_state);
+  // $form_state['rebuild'] = TRUE;
+
+  // If fid is not 0 we have a valid file.
+  /* if ($form_state['values']['cidesign_image_fid'] != 0) {
+    // The new file's status is set to 0 or temporary and in order to ensure
+    // that the file is not removed after 6 hours we need to change it's status
+    // to 1. Save the ID of the uploaded image for later use.
+    $file = file_load($form_state['values']['cidesign_image_fid']);
+    $file->status = FILE_STATUS_PERMANENT;
+    
+    $tmpFilename	= preg_replace('/[\s\W]+/', '_', $file->filename);
+    $filename		= $tmpFilename;
+    
+    file_save($file);
+    
+    $vals = $form_state['values'];
+    $filepath = 'public://test/';
+    // $filepath = 'temporary://test/';
+    $filename = 'rcc_date.mp3';
+
+    file_prepare_directory($filepath, FILE_CREATE_DIRECTORY);
+    $file = file_save_upload('podcast', array('file_validate_extensions' => array()), $filepath . $filename);
+    
+    
+    
+
+    // When a module is managing a file, it must manage the usage count.
+    // Here we increment the usage count with file_usage_add().
+    file_usage_add($file, 'cidesign', 'home_image', 1);
+
+    // Save the fid of the file so that the module can reference it later.
+    variable_set('cidesign_image_fid', $file->fid);
+    drupal_set_message(t('The image @image_name was uploaded and saved with an ID of @fid and will be displayed using the style @style.', array('@image_name' => $file->filename, '@fid' => $file->fid, '@style' => $form_state['values']['cidesign_style_name'])));
+  } */
+}
+
+/**
+ * Link callback; clear system caches.
+ */
+function _cidesign_clear_cache() {
+
+  drupal_flush_all_caches();
+  drupal_set_message(t('All Caches cleared.'));
+  //cache_clear_all(isset($uid) ? $cid : '*', 'cache_admin_menu', TRUE);
+  menu_rebuild();
+  drupal_set_message(t('Menu Rebuilt.'));
+  cache_clear_all('imagecache_actions', 'cache');
+  // cache_clear_all(NULL, 'cache_form');
+  // Rebuild .info data.
+  system_rebuild_theme_data();
+  //system_rebuild_module_data();
+  //system_list_reset();
+  //module_implements_reset();
+  //_system_update_bootstrap_status();
+  // Refresh the schema to include it.
+  //drupal_get_schema(NULL, TRUE);  
+  
+  // Rebuild theme registry.
+  drupal_theme_rebuild();
+  drupal_set_message(t('Theme Rebuilt.'));
+
+  // views_invalidate_cache();
+  // drupal_set_message(t('Views cache has been cleared.'));
+  drupal_goto('admin');
+}
+
+/**
+ * Implements hook_theme().
+ * 
+ * @return array 
+ */
+function cidesign_theme() {
+  
+  $themes = array();	
+	
+  // Create an Home theme.
+  $themes['cidesign_home'] = array('render element' => 'element');
+
+  // Register the templates
+  $info = cidesign_get_templates_info();
+  foreach ($info['templates'] as $name => $info) {
+    $themes['cidesign_home_' . $name] = array(
+      'template'	=> $name,
+      'variables'	=> array('params' => NULL),
+      'path'		=> $info['path'],	
+    ); 
+  }
+  
+  $themes['ascent_featured_homes'] = array(
+    'template'		=> 'featured_homes',
+    'variables'	=> array(NULL),
+    'path'			=> drupal_get_path('module', 'cidesign'),	
+  );
+
+  $themes['ascent_featured_videos'] = array(
+    'template'		=> 'featured_videos',
+    'variables'	=> array(NULL),
+    'path'			=> drupal_get_path('module', 'cidesign'),	
+  );
+  
+  $themes['cidesign_ascent_details_gallery'] = array(
+    'template'		=> 'details_gallery',
+    'variables'	=> array(NULL),
+    'path'			=> drupal_get_path('module', 'cidesign'),	
+  );  
+
+  return $themes;
+}
+
+function cidesign_get_templates_info() {
+
+  // Implement hook_html5_player_info
+  $cache = cache_get('cidesign_home_info');
+  if ($cache) {
+    return $cache->data;
+  }
+  else {
+    // Invoke all media_player_info and then set the cache.
+    $home_templates_info = module_invoke_all('home_templates_info');
+    cache_set('cidesign_home_info', $home_templates_info);
+    return $home_templates_info;
+  }
+}
+
+/**
+ * Implements hook_media_player_info
+ */
+function cidesign_home_templates_info() {
+  $path = drupal_get_path('module', 'cidesign') . '/templates';
+  return array(
+    //'plugins' => array(),
+    'templates' => array(
+      'details' => array(
+        'path' => $path . '/details',
+      ),										
+    ),
+  );
+}
+
+/**
+ * Theme for Home Details.
+ */
+function theme_cidesign_home($variables) {
+  // Get the element for this home.
+  if (isset($variables['element'])) {
+    $element = &$variables['element'];
+  }
+  else {
+    $element &$variables;
+  }
+  $template = $variables['#theme'];
+  $node		= $element['#node'];
+  	
+  // Return the theme.
+  return theme('cidesign_home_' . $template, $variables);
+}
+
+/**
+ * @param <type> $variables
+ *
+ */
+function template_preprocess_ascent_featured_homes(&$variables) {
+
+  /* $sql = db_query("SELECT fi.field_image_fid AS fid, fis.field_image_status_value AS image_status, 
+  field_image_featured_value AS featured, body_value, body_summary, n.title, n.nid
+  FROM field_collection_item ci 
+  INNER JOIN field_data_field_image fi ON ci.item_id = fi.entity_id
+  INNER JOIN field_data_field_image_featured fif ON ci.item_id = fif.entity_id AND  fif.field_image_featured_value = 1 
+  INNER JOIN field_data_field_image_status fis ON ci.item_id = fis.entity_id AND field_image_status_value = 1 
+  INNER JOIN field_data_field_media m ON ci.item_id = m.entity_id
+  LEFT JOIN field_data_body b ON m.entity_id = b.entity_id
+  LEFT JOIN node n ON m.entity_id = n.nid
+  GROUP BY n.nid")->fetchAll();
+  
+  $sql = db_query("SELECT fi.field_image_fid AS fid, fis.field_image_status_value AS image_status, 
+  field_image_featured_value AS featured,body_value, body_summary, n.title, n.nid FROM field_collection_item ci 
+  INNER JOIN field_data_field_media m ON ci.item_id = m.field_media_value 
+  LEFT JOIN node n ON m.entity_id = n.nid 
+  INNER JOIN field_data_field_image fi ON ci.item_id = fi.entity_id 
+  INNER JOIN field_data_field_image_featured fif ON ci.item_id = fif.entity_id
+  INNER JOIN field_data_field_image_status fis ON ci.item_id = fis.entity_id AND field_image_status_value = '1' 
+  INNER JOIN field_data_field_progress fp ON ci.item_id = fp.entity_id
+  LEFT JOIN field_data_body b ON m.entity_id = b.entity_id 
+  WHERE fp.field_progress_value = 'Featured Homes'
+  GROUP BY n.nid")->fetchAll(); */
+  
+  $sql = db_query("SELECT n.title, n.nid 
+  					FROM field_collection_item ci 
+					INNER JOIN field_data_field_media m ON ci.item_id = m.field_media_value 
+					LEFT JOIN node n ON m.entity_id = n.nid
+					INNER JOIN field_data_field_progress fp ON ci.item_id = fp.entity_id AND fp.field_progress_value = 'Featured Homes'
+					GROUP BY n.nid")->fetchAll();
+
+  if (count($sql) > 0) {
+    $featured_homes = array();
+    
+    for ($i = 0; $i < count($sql); $i++) {
+      
+      $row	= $sql[$i];
+      $imgs = db_query("SELECT fi.field_image_fid AS fid, field_image_featured_value AS featured, body_value, 
+      			fis.field_image_status_value AS image_status, body_summary
+				FROM field_data_field_media m
+				INNER JOIN field_data_field_image fi ON m.field_media_value = fi.entity_id 
+				INNER JOIN field_data_field_image_featured fif ON m.field_media_value = fif.entity_id
+				INNER JOIN field_data_field_image_status fis ON m.field_media_value = fis.entity_id AND field_image_status_value = '1'
+				LEFT JOIN field_data_body b ON m.entity_id = b.entity_id
+				WHERE m.entity_id = :nid AND fi.field_image_fid IS NOT NULL
+				ORDER BY fi.field_image_fid, field_image_featured_value ASC LIMIT 1", array(':nid' => $row->nid))->fetchAll();
+      
+      if (count($imgs) > 0) {
+        for ($n = 0; $n < count($imgs); $n++) {
+          $rec				= $imgs[$n];
+          $fid				= $rec->fid;
+          $file				= file_load($fid);
+          $image			= image_style_url('featured_home', $file->uri);
+          $desc				= truncate_utf8($rec->body_value, 190, TRUE, TRUE, 1);          
+          $featured_homes[]	= array('image' => $image, 'title' => $row->title, 'desc' => $desc, 'nid' => $row->nid); 
+        }
+      }
+    }	  
+  
+    $variables['featured_homes'] = $featured_homes;  
+  } else {
+    $variables['featured_homes'] = NULL;	  
+  }
+
+  
+    
+  /*$sql = db_query("SELECT fi.field_image_fid AS fid, fis.field_image_status_value AS image_status, 
+  field_image_featured_value AS featured,body_value, body_summary, n.title, n.nid FROM field_collection_item ci 
+  INNER JOIN field_data_field_media m ON ci.item_id = m.field_media_value 
+  LEFT JOIN node n ON m.entity_id = n.nid 
+  INNER JOIN field_data_field_image fi ON ci.item_id = fi.entity_id 
+  INNER JOIN field_data_field_image_featured fif ON ci.item_id = fif.entity_id
+  INNER JOIN field_data_field_image_status fis ON ci.item_id = fis.entity_id AND field_image_status_value = '1'
+  INNER JOIN field_data_field_progress fp ON m.entity_id = fp.entity_id
+  LEFT JOIN field_data_body b ON m.entity_id = b.entity_id 
+  WHERE fp.field_progress_value = 'Homes In Progress'
+  GROUP BY n.nid")->fetchAll();
+
+  if (count($sql) > 0) {
+    
+    $homes_in_progress = array();
+
+    for ($i = 0; $i < count($sql); $i++) {
+      $row					= $sql[$i];
+      $fid					= $row->fid;
+      $file					= file_load($fid);
+      $image				= image_style_url('featured_home', $file->uri);
+      $desc					= truncate_utf8($row->body_value, 190, TRUE, TRUE, 1);
+      $homes_in_progress[]	= array('image' => $image, 'title' => $row->title, 'desc' => $desc, 'nid' => $row->nid);
+   
+    }	  
+  }*/
+
+  $psql = db_query("SELECT n.title, n.nid 
+  					FROM field_collection_item ci 
+					INNER JOIN field_data_field_media m ON ci.item_id = m.field_media_value 
+					LEFT JOIN node n ON m.entity_id = n.nid
+					INNER JOIN field_data_field_progress fp ON ci.item_id = fp.entity_id AND fp.field_progress_value = 'Homes In Progress'
+					GROUP BY n.nid")->fetchAll();
+
+  if (count($psql) > 0) {
+    $progress_homes = array();
+    
+    for ($i = 0; $i < count($psql); $i++) {
+      
+      $row	= $psql[$i];
+      $imgs = db_query("SELECT fi.field_image_fid AS fid, field_image_featured_value AS featured,body_value, 
+      			fis.field_image_status_value AS image_status, body_summary
+				FROM field_data_field_media m
+				INNER JOIN field_data_field_image fi ON m.field_media_value = fi.entity_id 
+				INNER JOIN field_data_field_image_featured fif ON m.field_media_value = fif.entity_id
+				INNER JOIN field_data_field_image_status fis ON m.field_media_value = fis.entity_id AND field_image_status_value = '1'
+				LEFT JOIN field_data_body b ON m.entity_id = b.entity_id
+				WHERE m.entity_id = :nid AND fi.field_image_fid IS NOT NULL
+				ORDER BY fi.field_image_fid, field_image_featured_value ASC LIMIT 1", array(':nid' => $row->nid))->fetchAll();
+      
+      if (count($imgs) > 0) {
+        for ($n = 0; $n < count($imgs); $n++) {
+          $rec				= $imgs[$n];
+          $fid				= $rec->fid;
+          $file				= file_load($fid);
+          $image			= image_style_url('featured_home', $file->uri);
+          $desc				= truncate_utf8($rec->body_value, 190, TRUE, TRUE, 1);          
+          $progress_homes[]	= array('image' => $image, 'title' => $row->title, 'desc' => $desc, 'nid' => $row->nid); 
+        }
+      }
+    }	  
+  
+    $variables['homes_in_progress'] = $progress_homes;  
+  } else {
+    $variables['homes_in_progress'] = NULL;	  
+  }   
+
+  //$variables['homes_in_progress']	= $homes_in_progress;
+
+}
+
+/**
+ * Theme for Featured Videos.
+ */
+function theme_featured_videos($variables) {
+  // Get the element for featured videos.
+  if (isset($variables['element'])) {
+    $element = &$variables['element'];
+  }
+  else {
+    $element &$variables;
+  }
+  
+  
+  // Return the theme.
+  return theme('cidesign_featured_videos', $variables);
+}
+
+/**
+ * @param <type> $variables
+ *
+field_video_thumb_alt
+field_video_thumb_title
+field_video_thumb_width
+field_video_thumb_height 
+ */
+function template_preprocess_ascent_featured_videos(&$variables) {
+  
+  //ctools_include('ajax');
+  //ctools_include('modal');
+  //ctools_modal_add_js();
+
+  $modal_style = array(
+  'ctools-sample-style' => array(
+    'modalSize' => array('type' => 'fixed','width' => 680,'height' => 550,'addWidth' => 20,'addHeight' => 15,),
+    'modalOptions' => array('opacity' => 0.8,'background-color' => '#000',),
+    'closeText' => t('Close'),
+    'animation' => 'fadeIn',
+    'modalTheme' => 'CToolsSampleModal',
+    'throbber' => theme('image', array('path' => '/misc/throbber.gif', 'alt' => t('Loading...'), 
+    'title' => t('Loading'))),
+  ),);
+
+  //drupal_add_js($modal_style, 'setting');
+  //ctools_add_js('ctools-ajax-sample', 'ctools_ajax_sample');
+  //ctools_add_css('ctools-ajax-sample', 'ctools_ajax_sample');
+
+  $sql = db_query("SELECT t.field_video_image_fid AS fid, u.field_video_link_value AS url, n.title, n.nid
+  FROM node n
+  INNER JOIN field_data_field_video_image t ON n.nid = t.entity_id
+  INNER JOIN field_data_field_video_link u ON n.nid = u.entity_id
+  WHERE t.field_video_image_fid IS NOT NULL LIMIT 2")->fetchAll();
+
+  if (count($sql) > 0) {
+    
+    $videos = array();
+
+    for ($i = 0; $i < count($sql); $i++) {
+      $r			= $sql[$i];
+      $fid			= $r->fid;
+      $file			= file_load($fid);
+      $image		= image_style_url('front_featured_videos', $file->uri);
+      $button		= ctools_modal_text_button($r->title, 'featured-videos/nojs/' . $r->nid, 
+      					$r->title, 'ctools-modal-ctools-sample-style featured-video-button');
+	  $link			= ctools_modal_text_button($r->title, 'featured-videos/nojs/' . $r->nid, $r->title, 'ctools-modal-ctools-sample-style');
+      $videos[]	= array('image' => $image, 'title' => $r->title, 'url' => $link, 'nid' => $r->nid, 'button' => $button);
+    }	  
+  }
+  $variables['featured_videos']	= $videos;
+}
+
+
+/**
+ * Theme for details gallery.
+ */
+function theme_cidesign_ascent_details_gallery($variables) {
+  // Get the element for details gallery.
+  if (isset($variables['element'])) {
+    $element = &$variables['element'];
+  }
+  else {
+    $element &$variables;
+  }
+  
+  
+  // Return the theme.
+  return theme('cidesign_ascent_details_gallery', $variables);
+}
+
+/** 
+ * DESCRIPTION 
+ *
+ * @param $variable
+ *   A description of param
+ * 
+ * @return 
+ *   A description of return
+ */
+function template_preprocess_cidesign_ascent_details_gallery(&$variables) { 
+/**  
+ * Description  
+ */
+  ctools_include('ajax');
+  ctools_include('modal');
+  ctools_modal_add_js();
+
+  $modal_style = array(
+  'ctools-sample-style' => array(
+    'modalSize' => array('type' => 'fixed','width' => 680,'height' => 550,'addWidth' => 20,'addHeight' => 15,),
+    'modalOptions' => array('opacity' => 0.8,'background-color' => '#000',),
+    'closeText' => t('Close'),
+    'animation' => 'fadeIn',
+    'modalTheme' => 'CToolsSampleModal',
+    'throbber' => theme('image', array('path' => '/misc/throbber.gif', 'alt' => t('Loading...'), 
+    'title' => t('Loading'))),
+  ),);
+
+  drupal_add_js($modal_style, 'setting');
+  ctools_add_js('ctools-ajax-sample', 'ctools_ajax_sample');
+  ctools_add_css('ctools-ajax-sample', 'ctools_ajax_sample');
+  
+  $sqlV = db_query("SELECT vi.*, m.fid AS fid, n.nid, n.title
+						FROM field_data_field_video_image vi
+						INNER JOIN file_managed m ON vi.field_video_image_fid = m.fid
+						INNER JOIN file_usage u ON m.fid = u.fid
+						INNER JOIN node n ON vi.entity_id = n.nid")->fetchAll();
+  
+  if (count($sqlV) > 0) {
+    
+    $videos = array();
+
+    for ($i = 0; $i < count($sqlV); $i++) {
+      $r			= $sqlV[$i];
+      $fid			= $r->fid;
+      $file			= file_load($fid);
+	  $image		= image_style_url('featured_home', $file->uri);
+	  $link			= ctools_modal_text_button($r->title, 'featured-videos/nojs/' . $r->nid, $r->title, 'ctools-modal-ctools-sample-style');
+	  $button		= ctools_modal_text_button($r->title, 'featured-videos/nojs/' . $r->nid, 
+      					$r->title, 'ctools-modal-ctools-sample-style featured-video-button');
+      $videos[]	= array('image' => $image, 'title' => $r->title, 'url' => $link, 'nid' => $r->nid, 'button' => $button);
+    }	  
+  }
+  $variables['featured_videos']	= $videos;
+
+  $sql = db_query("SELECT fi.field_image_fid AS fid, fis.field_image_status_value AS image_status, 
+  field_image_featured_value AS featured,body_value, body_summary, n.title, n.nid FROM field_collection_item ci 
+  INNER JOIN field_data_field_media m ON ci.item_id = m.field_media_value 
+  LEFT JOIN node n ON m.entity_id = n.nid 
+  INNER JOIN field_data_field_image fi ON ci.item_id = fi.entity_id 
+  INNER JOIN field_data_field_image_featured fif ON ci.item_id = fif.entity_id AND fif.field_image_featured_value = '1' 
+  INNER JOIN field_data_field_image_status fis ON ci.item_id = fis.entity_id AND field_image_status_value = '1' 
+  LEFT JOIN field_data_body b ON m.entity_id = b.entity_id 
+  GROUP BY n.nid")->fetchAll();
+
+  if (count($sql) > 0) {
+    
+    $featured_homes = array();
+
+    for ($i = 0; $i < count($sql); $i++) {
+    
+      $row						= $sql[$i];
+      $fid						= $row->fid;
+      $file						= file_load($fid);
+      $image					= image_style_url('featured_home', $file->uri);
+      $featured_homes[]			= array('image' => $image, 'title' => $row->title, 'desc' => $row->body_value, 'nid' => $row->nid);
+   
+    }	  
+  }
+  $variables['featured_homes']	= $featured_homes; 
+
+}
+
+function _cidesign_ascent_details_gallery_page(){
+  return theme('cidesign_ascent_details_gallery');
+}

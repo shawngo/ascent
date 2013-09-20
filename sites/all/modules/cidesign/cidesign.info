@@ -1,0 +1,9 @@
+name = CI Design
+description = "Main CI Design Module."
+package = "CI Design"
+core = 7.x
+files[] = cidesign.module
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "cidesign"
+datestamp = "1374594000"

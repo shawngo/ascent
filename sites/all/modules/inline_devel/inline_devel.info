@@ -1,0 +1,15 @@
+name = Inline  devel
+description = Inline php editor.
+package = Development
+core = 7.x
+
+tags[] = developer
+dependencies[] = devel
+dependencies[] = inline_devel_dummy_module
+
+; Information added by drupal.org packaging script on 2013-06-08
+version = "7.x-1.0"
+core = "7.x"
+project = "inline_devel"
+datestamp = "1370696752"
+

@@ -1,0 +1,86 @@
+<?php
+/**
+ * @file
+ * Simulate some Firebug features in browsers that are not named "Firefox".
+ */
+
+/**
+ * Implements hook_init().
+ */
+function firebug_lite_init() {
+  // Access check
+  if (!user_access('use firebug lite')) {
+    return;
+  }
+
+  $settings = _firebug_lite_get_options();
+
+  $query_string = '';
+  foreach ($settings as $setting => $value) {
+    $query_string .= $setting . "=" . var_export($value['value'], TRUE) . ',';
+  }
+
+  drupal_add_js($GLOBALS['base_url'] . '/' . drupal_get_path('module', 'firebug_lite') . '/build/firebug-lite.js#' . $query_string, array(
+    // Drupal adds a hash to filepath, which causes issues. Use the "external"
+    // type to prevent this.
+    'type' => 'external',
+    'group' => JS_LIBRARY,
+  ));
+}
+
+/**
+ * Implements hook_menu().
+ */
+function firebug_lite_menu() {
+  return array(
+    'admin/config/development/firebug_lite' => array(
+      'title' => 'Firebug Lite',
+      'description' => 'Configure Firebug Lite',
+      'access arguments' => array('administer site'),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('firebug_lite_settings_form'),
+      'type' => MENU_NORMAL_ITEM,
+      'file' => 'firebug_lite.admin.inc',
+    ),
+  );
+}
+
+/**
+ * Implements hook_permission().
+ */
+function firebug_lite_permission() {
+  return array('use firebug lite' => array(
+    'title' => t('Use Firebug Lite'),
+    'description' => t('Use Firebug Lite'),
+  ));
+}
+
+/**
+ * Returns an array with the current values of firebug_lite's boolean options.
+ */
+function _firebug_lite_get_options() {
+  $options = array();
+  foreach (_firebug_lite_options() as $option => $default) {
+    $variable_name = 'firebug_lite_' . strtolower($option);
+    $options[$option] = array('variable_name' => $variable_name, 'value' => variable_get($variable_name, $default));
+  }
+  return $options;
+}
+
+/**
+ * Returns an array with firebug lite's boolean options and their defaults.
+ */
+function _firebug_lite_options() {
+  return array(
+    'saveCookies' => FALSE,
+    'startOpened' => FALSE,
+    'startInNewWindow' => FALSE,
+    'showIconWhenHidden' => TRUE,
+    'overrideConsole' => TRUE,
+    'ignoreFirebugElements' => TRUE,
+    'disableXHRListener' => FALSE,
+    'disableWhenFirebugActive' => TRUE,
+    'enableTrace' => FALSE,
+    'enablePersistent' => FALSE,
+  );
+}

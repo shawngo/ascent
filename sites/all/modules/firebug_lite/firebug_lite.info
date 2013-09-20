@@ -1,0 +1,12 @@
+name = Firebug Lite
+description = Simulate some Firebug features in browsers that are not named "Firefox".
+package = Development
+core = "7.x"
+configure = admin/config/development/firebug_lite
+
+; Information added by drupal.org packaging script on 2013-04-25
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "firebug_lite"
+datestamp = "1366894111"
+

@@ -1,0 +1,300 @@
+<?php
+/**
+ * @file
+ * The file for the inline_devel module.
+ */
+
+/**
+ * Implements hook_init().
+ */
+function inline_devel_init() {
+  // Check if we need to flush the hooks cache when a hook removed/declared.
+  _inline_devel_clear_cache_when_needed();
+}
+
+/**
+ * Implements hook_boot().
+ */
+function inline_devel_boot() {
+  // Building declared function in each page callback.
+  _inline_devel_run_sessioned_functions();
+}
+
+/**
+ * Implements hook_menu().
+ */
+function inline_devel_menu() {
+  $items = array();
+
+  $items['devel/php/inline_devel/%'] = array(
+    'page callback' => 'inline_devel_php_functions',
+    'page arguments' => array(3),
+    'access arguments' => array('access devel information'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Menu callback - Print out JSON format with the name of the functions.
+ */
+function inline_devel_php_functions($text) {
+  $functions = inline_devel_get_relevent_functions($text);
+
+  drupal_json_output($functions);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function inline_devel_form_devel_execute_form_alter(&$form, &$form_state) {
+  // Load the default settings into the js.
+  _inline_devel_load_settings_to_js();
+
+  // Add the js and css file.
+  $form['#attached']['js'][] = drupal_get_path('module', 'inline_devel') . '/js/inline_devel_api.js';
+  $form['#attached']['js'][] = drupal_get_path('module', 'inline_devel') . '/js/inline_devel.js';
+  $form['#attached']['css'][] = drupal_get_path('module', 'inline_devel') . '/css/inline_devel.css';
+
+  // Add div beneath the form.
+  $form['execute']['code']['#description'] = "<div class='suggestion' id='suggestion'></div>" . $form['execute']['code']['#description'];
+
+  // Verify we don't declare the same function.
+  $form['#validate'][] = 'inline_devel_prevent_redeclare';
+
+  // Adding function that check if you a user entered a hook.
+  $form['#submit'][] = 'inline_devel_form_submit_register_hook';
+}
+
+/**
+ * Validate function to prevent redeclare the same function name.
+ */
+function inline_devel_prevent_redeclare(&$form, &$form_state) {
+  if (empty($form_state['values']['code'])) {
+    return;
+  }
+
+  $functions = inline_devel_php_parsing($form_state['values']['code']);
+
+  if (empty($functions)) {
+    return;
+  }
+
+  if (isset($_SESSION['function'][$functions[1]])) {
+    unset($_SESSION['function'][$functions[1]]);
+  }
+}
+
+/**
+ * Custom submit handler: register hook in the hooks_sessions.
+ */
+function inline_devel_form_submit_register_hook(&$form, &$form_state) {
+  if (empty($form_state['values']['code'])) {
+    return;
+  }
+
+  $functions = inline_devel_php_parsing($form_state['values']['code']);
+
+  if (empty($functions)) {
+    return;
+  }
+
+  // Change the hook prefix name.
+  inline_devel_change_hook_prefix($functions[1]);
+
+  $_SESSION['function'][$functions[1]] = array(
+    'function' => $functions[1],
+    'arguments' => $functions[2],
+    'content' => $functions[3],
+  );
+
+  // Show message.
+  drupal_set_message(t('The function @function-name inserted successfully to the functions stack.', array(
+    '@function-name' => $functions[1],
+  )));
+}
+
+/**
+ * Get list of hooks.
+ */
+function inline_devel_get_list_of_hooks() {
+  $dirs = array('includes', 'modules', 'sites');
+  $files = array();
+  foreach ($dirs as $dir) {
+    inline_devel_get_all_files($dir, $files);
+  }
+
+  foreach ($files as $file) {
+    // Start processing.
+    $content = @file_get_contents($file);
+
+    if (!$content) {
+      continue;
+    }
+
+    if (preg_match_all("/module_invoke_all\((.*?), (.*?)\);/ismx", $content, $arr)) {
+      foreach ($arr[1] as $hook) {
+        if ($name = reset(explode(")", str_replace(array("'", " ", ".", '"'), "", $hook)))) {
+          $hooks[] = "hook_" . $name;
+        }
+      }
+    }
+
+    if (preg_match_all("/module_implements\('(.*?)'\)/ismx", $content, $arr)) {
+      foreach ($arr[1] as $hook) {
+        if ($name = reset(explode(")", str_replace(array("'", " ", ".", '"'), "", $hook)))) {
+          $hooks[] = "hook_" . $name;
+        }
+      }
+    }
+  }
+
+  return array_unique($hooks);
+}
+
+/**
+ * Scan all the directory for inc files or modules files.
+ *
+ * @param string $dir
+ *   The directory path that need to scan for files.
+ *
+ * @param array $files_list
+ *   An array contain all the files with the full path for file_get_contents().
+ */
+function inline_devel_get_all_files($dir, &$files_list) {
+  $files = scandir($dir);
+
+  foreach ($files as $file) {
+    if ($file != '.' && $file != '..') {
+      if (!is_dir($dir . '/' . $file)) {
+        $info = pathinfo(DRUPAL_ROOT . '/' . $dir . '/' . $file);
+        if (!empty($info['extension']) && in_array($info['extension'], array('module', 'inc'))) {
+          $files_list[] = ($dir . '/' . $file);
+        }
+      }
+      else {
+        inline_devel_get_all_files($dir . '/' . $file, $files_list);
+      }
+    }
+  }
+}
+
+/**
+ * Return the function name that start with the argument.
+ */
+function inline_devel_get_relevent_functions($funcion_name) {
+  $funcion_name = end(explode(' ', $funcion_name));
+
+  $functions = get_defined_functions();
+
+  if ($cache = cache_get('function_list')) {
+    $scope = $cache->data;
+  }
+  else {
+    $scope = array(
+      'function' => array_merge(array_merge($functions['internal'], $functions['user'])),
+      'class' => get_declared_classes(),
+      'interface' => get_declared_interfaces(),
+      'hooks' => inline_devel_get_list_of_hooks(),
+    );
+
+    cache_set('function_list', $scope, 'cache');
+  }
+
+
+  $output_functions = array();
+
+  $i = 0;
+  foreach ($scope as $type => $functions) {
+    foreach ($functions as $function) {
+      if (strpos(strtolower($function), strtolower($funcion_name)) === 0) {
+        $output_functions[] = array(
+          'id' => $i++,
+          'name' => $function,
+          'type' => $type,
+        );
+      }
+    }
+  }
+
+  return $output_functions;
+}
+
+/**
+ * Use REGEX to tear down functions.
+ *
+ * TODO: for now, the REGEX recognize only one function at a time, need a way to
+ * recognize all functions.
+ */
+function inline_devel_php_parsing($code) {
+  preg_match("/function.+?([a-zA-Z0-9_]+?)[\s]*\((.*?)\)[\s]*\{(.+)\}/is", $code, $functions);
+  return array_map("trim", $functions);
+}
+
+/**
+ * Rename hook to the inline_devel_dummy_module.
+ */
+function inline_devel_change_hook_prefix(&$text) {
+  $text = str_replace("hook", "inline_devel_dummy_module", $text);
+}
+
+/**
+ * Check if there new functions in the stack and rebuild cache if needed.
+ */
+function _inline_devel_clear_cache_when_needed() {
+  if (!isset($_SESSION['function'])) {
+    $_SESSION['function_number'] = 0;
+  }
+  else {
+    if (count($_SESSION['function']) != $_SESSION['function_number']) {
+      $_SESSION['function_number'] = count($_SESSION['function']);
+
+      // Flush all because there is a new function in the stack.
+      drupal_flush_all_caches();
+    }
+  }
+}
+
+/**
+ * Build the functions in the stack.
+ */
+function _inline_devel_run_sessioned_functions() {
+  if ($_SESSION['function_number'] == 0) {
+    return;
+  }
+  if (isset($_SESSION['function']) && !empty($_SESSION['function'])) {
+    foreach ($_SESSION['function'] as $function) {
+      eval('function ' . $function['function'] . '(' . $function['arguments'] . ') {
+        ' . $function['content'] . '
+      }');
+    }
+  }
+}
+
+/**
+ * Load the keyboards settings from the DB into Drupal js settings variable.
+ */
+function _inline_devel_load_settings_to_js() {
+  $variables = array(
+    'ctrl_s_enable' => TRUE,
+    'esc_enable' => TRUE,
+    'spaces_instead_of_tabs' => TRUE,
+    'number_of_spaces' => 2,
+  );
+
+  $settings = array();
+
+  foreach ($variables as $name => $value) {
+    $settings[$name] = variable_get($name, $value);
+  }
+
+  drupal_add_js(
+    array(
+      'inline_devel' => $settings,
+    ),
+    array(
+      'type' => 'setting',
+    )
+  );
+}
