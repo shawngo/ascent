@@ -556,6 +556,8 @@ transition: 1.5s linear;
 	text-transform: uppercase;
 	font-size: 15px;
 	line-height: 10px;
+  min-width: 150px;
+  text-align: center;
 	text-shadow: 1px 3px 3px rgba(120,85,45,0.65);
 	background: rgb(206,179,142);
 	background: -moz-linear-gradient(top,  rgba(206,179,142,1) 0%, rgba(165,128,86,1) 100%);
