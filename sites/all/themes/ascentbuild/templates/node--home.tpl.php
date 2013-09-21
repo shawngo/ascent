@@ -262,7 +262,8 @@
     <?php
       if (isset($node->field_home_testimonial['und'])):
     ?> 
-    <a href="/testimonials/<?php $node->nid; ?>" class="orange-bevel-link" title="Hear From The Owners">Hear From The Owners</a>
+    <?php /* <a href="/testimonials/<?php $node->nid; ?>" class="orange-bevel-link" title="Hear From The Owners">Hear From The Owners</a> */ ?>
+    <a href="/testimonials" class="orange-bevel-link" title="Hear From The Owners">Hear From The Owners</a>
     <?php endif; ?>
     </section>
   </main> 
