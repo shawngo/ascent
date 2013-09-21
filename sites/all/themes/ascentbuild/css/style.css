@@ -109,6 +109,18 @@ header aside#header-info {
 	text-align: right;
 	margin: 0px 10px 0px 0px; }
 
+#header-info .houzz a {
+color: #D4B68C;
+font-size: 14px;
+padding-left: 20px;
+background: url(../images/houzz.png) top left no-repeat;
+background-size: 15px;
+margin-left: 10px;
+}
+#header-info .houzz a:hover {
+text-decoration: underline;
+}
+
 header #header-inner nav {
 	margin: 30px 0px 0px;
 	/* border-top-width: 3px;
