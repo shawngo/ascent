@@ -50,6 +50,7 @@ function cidesign_menu() {
   'access arguments' => array('administer site configuration'),
   'weight' => -99,);
   
+/*
   $items['featured-homes'] = array(
   'title' => t('Featured Homes'),
   'description' => t("Our Featured Homes"),
@@ -61,6 +62,7 @@ function cidesign_menu() {
   'parent' => 'main-navigation',
   'expanded' => TRUE,
   'type' => MENU_NORMAL_ITEM);
+*/
   
   $items['featured-videos/%ctools_js/%'] = array(
   'title' => t('Title'),  
