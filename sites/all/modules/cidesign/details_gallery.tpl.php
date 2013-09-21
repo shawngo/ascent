@@ -19,6 +19,7 @@
 </section>
 <?php endif; ?>
 
+<?php /*
 <h1 title="featured-videos" id="featured-videos"><span>Featured Videos</span></h1>
 <section id="featured-videos-gallery">
 <?php 
@@ -31,3 +32,4 @@
   </article> 
 <?php endfor; ?>
 </section>
+*/ ?>
