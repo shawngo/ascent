@@ -4,7 +4,7 @@
   <?php if ($logo): ?>
   <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>" rel="home" id="logo"></a>
   <?php endif; ?>
-  <aside id="header-info">262.650.9705</aside>
+  <aside id="header-info"><span class="phone">262.650.9705</span> <span class="houzz"><a href="http://www.houzz.com/user/ascent">Visit us on Houzz</a></aside>
   <nav>
     <ul>
       <li class="why-ascent"><a href="/why-ascent"><span>Why</span> Ascent</a></li>
