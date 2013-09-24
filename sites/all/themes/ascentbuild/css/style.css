@@ -1642,3 +1642,25 @@ footer .footer-container a.footer-logo {
 	width: 178px;
 	margin: 23px 0px 0px 0px;
 	padding: 0px 0px 0px 0px; }
+
+#node-28 {
+margin-left: 200px;
+width: 800px;
+}
+.form-textarea-wrapper textarea {
+width: auto;
+}
+#modal-content .messages {
+margin: 30px 0 -15px 30px;
+}
+#webform-component-contact-information {
+float: left;
+width: 390px;
+clear: none;
+padding-left: 30px;
+}
+#webform-component-additional-information {
+float: left;
+width: 340px;
+clear: none;
+}

@@ -91,9 +91,10 @@ function cidesign_menu() {
 */
 
   $items['contact-us/%ctools_js'] = array(
-      'title' => 'Login',
-      'page callback' => 'cidesign_contact_us',
-      'page arguments' => array(1),
+      'title' => 'Contact Us',
+//      'page callback' => 'cidesign_contact_us',
+      'page callback' => 'cidesign_ctools_ajax_modal_webform',
+      'page arguments' => array(1, '28'),
       'access callback' => TRUE,
       'type' => MENU_CALLBACK,
   );
@@ -167,6 +168,75 @@ function _cidesign_view_home_testimonials($js = NULL, $nid = NULL) {
   ctools_include('ajax');
   $output = array();
   $output[] = ctools_modal_command_display(t('Testimonial'), $node->field_home_testimonial['und'][0]['value']);
+
+  print ajax_render($output);
+  exit;
+}
+
+function cidesign_ctools_ajax_modal_webform($js = NULL, $webform_nid = NULL) {
+  $webform_nid = 28;
+  $node = node_load($webform_nid);
+  $submission =  (object) array();
+    
+  if (!$js) {
+    return drupal_get_form('webform_client_form_'.$webform_nid, $node, $submission);
+  }
+
+  ctools_include('modal');
+  ctools_include('ajax');
+  $form_state = array(
+    'title' => $node->title,
+    'ajax' => TRUE,
+  );
+
+  // Create our own javascript that will be used to theme a modal.
+      $contact_style = array(
+        'contact-modal-style' => array(
+          'modalSize' => array(
+            'type' => 'fixed',
+            'width' => 600,
+            'height' => 240,
+            'addWidth' => 10,
+            'addHeight' => 10,
+            'contentRight' => 0,
+            'contentBottom' => 0,
+          ),
+          'modalOptions' => array(
+            'opacity' => .6,
+            'background-color' => '#684C31',
+          ),
+          'animation' => 'fadeIn',
+//          'modalTheme' => 'contact_modal',
+          // Customize the AJAX throbber like so:
+          // This function assumes the images are inside the module directory's "images"
+          // directory:
+          // ctools_image_path($image, $module = 'ctools', $dir = 'images')
+//          'throbber' => theme('image', array('path' => ctools_image_path('ajax-loader.gif', 'happy'), 'alt' => t('Loading...'), 'title' => t('Loading'))),
+//          'closeImage' => theme('image', array('path' => ctools_image_path('modal-close.png', 'happy'), 'alt' => t('Close window'), 'title' => t('Close window'))),
+        ),
+      );
+    // Add the settings array defined above to Drupal 7's JS settings:
+    drupal_add_js($contact_style, 'setting');
+    // The function below assumes the happy.js file resides in [module_dir]/js
+    // ctools_add_js('cidesign', 'cidesign');
+    // The function below assumes the happy.css file resides in [module_dir]/css
+    //ctools_add_css('cidesign', 'cidesign');
+
+  // Fetch webform form stuff
+  //$output = drupal_get_form('webform_client_form_'.$webform_nid, $node, $submission);
+  $args = array($node, $submission);
+  $form_state['build_info']['args'] = $args;
+  $output = ctools_modal_form_wrapper('webform_client_form_'.$webform_nid, $form_state);
+  if ( isset($_SESSION['webform_client_form_'.$webform_nid]) && $_SESSION['webform_client_form_'.$webform_nid] == 'submitted') {
+    unset($_SESSION['webform_client_form_'.$webform_nid]);
+    $confirmation['#markup'] = 
+      '<div class="popups-confirmation-wrapper">'.
+      drupal_render($whatever_you_like).
+      '</div>';
+    $output = array(); // Recreate output
+    // Overwrite the form output if it was successful.
+    $output[] = ctools_modal_command_display('Confirmation', $confirmation);
+  }
 
   print ajax_render($output);
   exit;

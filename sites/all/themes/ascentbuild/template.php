@@ -133,7 +133,8 @@ function ascentbuild_process_page(&$variables) {
 	//$closeImage = theme('image', array('path' => ctools_image_path('icon-close-window.png'), 'title' => t('Close'),'alt' => t('Close')));
     $modal_style = array(
     'ctools-sample-style' => array(
-    'modalSize' => array('type' => 'scale', 'addWidth' => 20, 'addHeight' => 25,),
+//    'modalSize' => array('type' => 'scale', 'addWidth' => 20, 'addHeight' => 25,),
+    'modalSize' => array('type' => 'fixed', 'width' => 800, 'height' => 440,),
     'modalOptions' => array('opacity' => 0.8,'background-color' => '#000',),
     'closeText' => t('Close'),
     'animation' => 'fadeIn',
@@ -144,7 +145,7 @@ function ascentbuild_process_page(&$variables) {
   drupal_add_js($modal_style, 'setting');
   ctools_add_js('ctools-ajax-sample', 'ctools_ajax_sample');
   ctools_add_css('ctools-ajax-sample', 'ctools_ajax_sample');	
-  $variables['contact_modal'] = ctools_modal_text_button('Contact Us</span>', 'contact-us/nojs', '', 'ctools-modal-ctools-sample-style');
+  $variables['contact_modal'] = ctools_modal_text_button('Contact Us</span>', 'contact-us/nojs', '', 'happy-modal ctools-modal-ctools-sample-style');
 
  
 
