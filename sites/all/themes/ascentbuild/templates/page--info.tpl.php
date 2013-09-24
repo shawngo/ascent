@@ -31,7 +31,7 @@
     <?php print render($page['content']); ?>
     <!-- page end -->
     <section id="addtional-info">
-      <h3>Related Videos</h3>
+      <h3>Related Information</h3>
       <aside id="side-related-videos">
         <span class="top-shadow"></span>
         <?php //print $info_videos; ?>
