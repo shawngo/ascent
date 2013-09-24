@@ -25,6 +25,11 @@ function ascentbuild_process_html(&$variables) {
 
 function ascentbuild_preprocess_node(&$variables) {
 
+//  $variables['featured_region'] = theme('blocks', 'featured_region');
+  if ($blocks  = block_get_blocks_by_region('featured_region')) {
+    $variables['featured_region'] = $blocks;
+  }
+
   $variables['node'] = $variables['elements']['#node'];
   $node = $variables['node'];
   if ($node->type == 'info') {
@@ -157,6 +162,7 @@ function ascentbuild_process_page(&$variables) {
     $one = ctools_modal_text_button(t($oTitle), 'featured-videos/nojs/1', t($oTitle), 'ctools-modal-ctools-sample-style');
     $two = ctools_modal_text_button(t($tTitle), 'featured-videos/nojs/2', t($tTitle), 'ctools-modal-ctools-sample-style');  
   
+/*
     $variables['featured_videos'] = '<article id="video-one">
         <img src="/sites/all/themes/ascentbuild/images/video-1.jpg" alt="Building an Ascent Home" id="featured-video-one" />
         <caption>07.23.13</caption>
@@ -164,6 +170,7 @@ function ascentbuild_process_page(&$variables) {
     $variables['featured_videos'] .= '<article id="video-two">
         <img src="/sites/all/themes/ascentbuild/images/video-1.jpg" alt="Visit Our Model Home" id="featured-video-two" />
         <span>07.23.13</span><figcaption>' . $two . '</figcaption></article>';
+*/
 
     $variables['home_slide'] = '';
     $variables['slide_links'] = '';   	  
