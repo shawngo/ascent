@@ -910,6 +910,11 @@ main p {
    -webkit-transition: all linear 0.5s;
    width: 990px; }
 
+#featured-homes article h2,
+#featured-homes article p.desc {
+margin-left: 18px;
+}
+
 main.home-details {
 	margin: 0 auto;
 	padding: 0px 15px 90px 30px;
