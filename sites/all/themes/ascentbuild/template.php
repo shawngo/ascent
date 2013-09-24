@@ -181,25 +181,32 @@ function ascentbuild_process_page(&$variables) {
 					INNER JOIN field_data_field_image_status fis ON ci.item_id = fis.entity_id
 					WHERE fif.field_image_featured_value = 1 AND field_image_status_value = 1")->fetchAll();
 
-    for ($i = 0, $a = 1, $n = 2; $i < count($sql); $i++, $a++, $n++) {
+    $num_rows = count($sql);
+    for ($i = 0, $a = 1, $n = 2; $i < $num_rows; $i++, $a++, $n++) {
       $row = $sql[$i];
       $fid = $row->fid;
       $file = file_load($fid);
       $image = image_style_url('front_slide', $file->uri);
       if ($a == 1) { $lClass = $rClass = 'class="active"'; } else { $lClass = $rClass = ''; }
       $variables['home_slide'] .= '<figure id="home' . $a . '" ' . $lClass . '>';
-      $variables['home_slide'] .= '<a href="#home' . $a . '" rel="home' . $a . '" class="slide-link prev"></a>'; 
+      if ($a > 1) {
+        $b = $a - 1;
+      }
+      else {
+        $b = $num_rows;
+      }
+      $variables['home_slide'] .= '<a href="#home' . $b . '" rel="home' . $b . '" class="slide-link prev"></a>'; 
       $variables['home_slide'] .= '<div class="image-holder"><img src="' . $image . '" /></div>';
       $variables['home_slide'] .= '<figcaption><span>The Details Matter</span></figcaption>';
-      
-		if ($a == count($sql)){
-		  $variables['home_slide'] .= '<a href="#home1" class="slide-link next"></a></figure>';
-		} else {
-		  $variables['home_slide'] .= '<a href="#home' . $n . '" class="slide-link next"></a></figure>';			
-		}
-      $variables['slide_links'] .= '<a href="#home' . $a . '" rel="home' . $a . '"></a>'; 	    
-    }  
-    $variables['featured_videos'] = theme('ascent_featured_videos');	  
+
+      if ($a == count($sql)){
+        $variables['home_slide'] .= '<a href="#home1" class="slide-link next"></a></figure>';
+      } else {
+        $variables['home_slide'] .= '<a href="#home' . $n . '" class="slide-link next"></a></figure>';
+      }
+      $variables['slide_links'] .= '<a href="#home' . $a . '" rel="home' . $a . '" ' . $lClass . '></a>';
+    }
+    $variables['featured_videos'] = theme('ascent_featured_videos');
   } 
 }
 
