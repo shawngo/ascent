@@ -47,16 +47,14 @@
   </section>
   <div class="video-links-wrapper">
     <section id="feature-videos">
-      <h2>Featured Videos</h2>
       <?php print $featured_videos; ?>
-      <a href="/details-gallery#featured-videos" class="video-gallery"><span>See All Of Our Videos ></span></a>  
     </section>
     <aside id="helpful-links">
       <h3>Helpful Links</h3>
       <ul class="home-links">
-        <li class="top-shadow"><a href="/featured-homes">Featured Home of <?php print date('Y'); ?></a></li>
-        <li class="middle"><a href="/featured-homes#homes-in-progress">Homes in Progress</a></li>
-        <li class="bottom-shadow"><a href="/model-home">Our Model Home</a></li>      	    
+        <li class="top-shadow"><a href="/featured-homes">Featured Homes of <?php print date('Y'); ?></a></li>
+        <li class="middle"><a href="/featured-homes#homes-in-progress-details">Homes in Progress</a></li>
+        <li class="bottom-shadow"><a href="/homes/talus">Our Model Home</a></li>      	    
       </ul>
     </aside>      
     <div class="clearfix"></div>
@@ -64,7 +62,7 @@
   
   <section id="welcome-to-ascent">
     <h2>Welcome to Ascent Custom Homes</h2>
-    <p>Ascent Custom Homes specializes in beautiful custom homes unique to each owner’s discerning taste and particular requirements. That means no templates and no mass-produced designs. With our team approach to home building, Ascent coaches you through the process, assists in matching you with an architect that shares your sensibilities, and provides hands-on supervision throughout. When you work with Ascent, you can expect thoughtful design and building solutions because, whatever your lifestyle, the beauty is in the details!</p>
+    <p>Ascent Custom Homes specializes in beautiful custom homes unique to each owner's discerning taste and particular requirements. That means no templates and no mass-produced designs. With our team approach to home building, Ascent coaches you through the process, assists in matching you with an architect that shares your sensibilities, and provides hands-on supervision throughout. When you work with Ascent, you can expect thoughtful design and building solutions because, whatever your lifestyle, the beauty is in the details!</p>
     <a href="/featured-homes" class="featured-homes"><span>Experience our featured homes ></span></a>
   </section>
   </div>
@@ -83,11 +81,12 @@
     <?php endif; ?>  
     <!-- page begin -->
     <?php print render($page['content']); ?>
+    <?php print render($content_bottom); ?>
     <!-- page end -->
   </div>
 </div> <!-- /.container --> 
 <?php endif; ?>	
-	
+
 
 
 <footer>
