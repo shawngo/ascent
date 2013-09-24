@@ -175,13 +175,11 @@ $sql = db_query("SELECT field_image_fid AS fid, field_image_featured_value AS fe
 	      $img			=  '<img src="' . $info_image . '" alt="" />';
 	      print $img;
       }
-	      
-	      
-
       ?>
       
-      <h2><?php print $node->title; ?></h2>
-      <p><?php print $node->body[LANGUAGE_NONE][0]['safe_value']; ?></p>
+      <?php /* <h2><?php print $node->title; ?></h2> */ ?>
+      <?php print render($content); ?>
+      <?php /* print $node->body[LANGUAGE_NONE][0]['safe_value']; ?> */ ?>
       <?php if ($node->title === "Why Ascent" || $node->nid === 1) { ?>
           <ul id="team_members">
               <?php $team_sql = db_query("SELECT nid AS nid, type AS type
@@ -216,20 +214,11 @@ $sql = db_query("SELECT field_image_fid AS fid, field_image_featured_value AS fe
     </main>
   </div>
   <section id="addtional-info">
-    <h3>Related Videos</h3>
+    <h3>Related Information</h3>
     <aside id="side-related-videos">
       <span class="top-shadow"></span>
-<?php print $info_videos; 
-/*
-    $oTitle = 'Building an Ascent Home';
-    $tTitle = 'Visit Our Model Home';
-    $oneB = ctools_modal_text_button(t($oTitle), 'featured-videos/nojs/1', t($oTitle), 'ctools-modal-ctools-sample-style button');
-    $one = ctools_modal_text_button(t($oTitle), 'featured-videos/nojs/1', t($oTitle), 'ctools-modal-ctools-sample-style');
-    $twoB = ctools_modal_text_button(t($tTitle), 'featured-videos/nojs/2', t($tTitle), 'ctools-modal-ctools-sample-style button');
-    $two = ctools_modal_text_button(t($tTitle), 'featured-videos/nojs/2', t($tTitle), 'ctools-modal-ctools-sample-style'); */
-?>
+      <?php print render($featured_region); ?>
       <span class="bottom-shadow"></span>
-      <a href="/details-gallery#featured-videos" class="all-videos">See all of our videos <span class="right-arrow"></span></a>
       <div class="cleafix"></div> 
     </aside>
   </section>
