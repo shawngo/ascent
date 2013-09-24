@@ -80,6 +80,7 @@ function cidesign_menu() {
   //'access arguments' => array('access content'),
   'type' => MENU_CALLBACK,);  
   
+/*
   $items['details-gallery'] = array(
   'title' => t('Details Gallery'),  
   'page callback' => '_cidesign_ascent_details_gallery_page',
@@ -87,6 +88,7 @@ function cidesign_menu() {
   'access callback' => TRUE,
   //'access arguments' => array('access content'),
   'type' => MENU_NORMAL_ITEM);  
+*/
 
   $items['contact-us/%ctools_js'] = array(
       'title' => 'Login',
