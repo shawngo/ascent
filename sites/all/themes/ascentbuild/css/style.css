@@ -57,6 +57,16 @@ h1 a, h2 a, h3 a, h4 a, h5 a { font-weight: inherit; text-decoration: none; }
 
 p { margin: 0 0 10px 0; }
 
+blockquote {
+margin-bottom: 40px;
+margin-top: 20px;
+}
+main#info-description .testimonial-author {
+text-align: right;
+font-style: italic;
+font-size: 14px;
+}
+
 del { text-decoration: line-through; }
 
 pre, code { 
@@ -469,7 +479,7 @@ transition: 1.5s linear;
 	padding: 0px; }
 	
 #wrap.home .container .video-links-wrapper #feature-videos {
-	margin: 20px 0px 0px 2px;
+	margin: 50px 0px 0px 2px;
 	width: 682px;
 	padding: 0px;
 	float: left; }
@@ -660,7 +670,7 @@ div.video-links-wrapper #helpful-links ul.home-links li a:hover { color: #bc9f77
 	position: relative;
 	margin: 0px 0px 0px 26px;
 	min-height: 350px;
-	padding: 30px 0px 0px 0px;
+	padding: 50px 0px 0px 0px;
 	background: transparent url("/sites/all/themes/ascentbuild/images/home-welcome.png") no-repeat right bottom; }
 	
 #welcome-to-ascent h2 {
@@ -1110,6 +1120,7 @@ div#information {
 	min-height: 700px;
 	text-align: center; }
    
+#addtional-info h2,
 #addtional-info h3 {
 	margin: 0px;	
 	color: #a88459;
