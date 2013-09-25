@@ -118,24 +118,25 @@
  
  
  */
-  for ($i = 0; $i < count($node->field_media['und']); $i++):
-    $items[] = $node->field_media['und'][$i]['value'];
-  endfor;
+  if (!empty($node->field_media)) {
+    for ($i = 0; $i < count($node->field_media['und']); $i++) {
+      $items[] = $node->field_media['und'][$i]['value'];
+    }
 
-
-  $sql = db_query("SELECT fi.field_image_fid AS fid, fis.field_image_status_value AS image_status, field_image_featured_value AS featured, n.nid 
-  FROM field_collection_item ci 
-  INNER JOIN field_data_field_media m ON ci.item_id = m.field_media_value 
-  LEFT JOIN node n ON m.entity_id = n.nid
-  INNER JOIN field_data_field_image fi ON ci.item_id = fi.entity_id AND fi.bundle = 'field_media'
-  INNER JOIN field_data_field_image_featured fif ON ci.item_id = fif.entity_id AND fif.bundle = 'field_media'
-  INNER JOIN field_data_field_image_status fis ON ci.item_id = fis.entity_id AND fis.bundle = 'field_media'
-  WHERE ci.item_id IN (:items)", array(':items' => $items))->fetchAll();
-  
-  if ($sql) {
-    $count			= count($sql);
-    $result			= array_chunk($sql, 5);
-    $numThumbSets	= ceil($count/5);
+    $sql = db_query("SELECT fi.field_image_fid AS fid, fis.field_image_status_value AS image_status, field_image_featured_value AS featured, n.nid 
+    FROM field_collection_item ci 
+    INNER JOIN field_data_field_media m ON ci.item_id = m.field_media_value 
+    LEFT JOIN node n ON m.entity_id = n.nid
+    INNER JOIN field_data_field_image fi ON ci.item_id = fi.entity_id AND fi.bundle = 'field_media'
+    INNER JOIN field_data_field_image_featured fif ON ci.item_id = fif.entity_id AND fif.bundle = 'field_media'
+    INNER JOIN field_data_field_image_status fis ON ci.item_id = fis.entity_id AND fis.bundle = 'field_media'
+    WHERE ci.item_id IN (:items)", array(':items' => $items))->fetchAll();
+    
+    if ($sql) {
+      $count			= count($sql);
+      $result			= array_chunk($sql, 5);
+      $numThumbSets	= ceil($count/5);
+    }
   }
 
   $next = db_query("SELECT nid AS next_id FROM node 
@@ -239,7 +240,7 @@
   <main class="home-details">
     <article id="home-description">
       <h2><?php print $node->title; ?></h2>
-      <p><?php print $node->body['und'][0]['safe_value']; ?></p>
+      <?php /* <p><?php print $node->body['und'][0]['safe_value']; ?></p> */ ?>
     <?php
       // We hide the comments and links now so that we can render them later.
       //hide($content['comments']);
