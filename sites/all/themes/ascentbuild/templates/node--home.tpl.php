@@ -240,7 +240,7 @@
   <main class="home-details">
     <article id="home-description">
       <h2><?php print $node->title; ?></h2>
-      <?php /* <p><?php print $node->body['und'][0]['safe_value']; ?></p> */ ?>
+      <p><?php print $node->body['und'][0]['safe_value']; ?></p>
     <?php
       // We hide the comments and links now so that we can render them later.
       //hide($content['comments']);
