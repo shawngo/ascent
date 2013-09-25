@@ -261,11 +261,11 @@
     </ul>
     <?php endif; ?>
     <?php
-      if (isset($node->field_home_testimonial['und'])):
+      //if (isset($node->field_home_testimonial['und'])):
     ?> 
     <?php /* <a href="/testimonials/<?php $node->nid; ?>" class="orange-bevel-link" title="Hear From The Owners">Hear From The Owners</a> */ ?>
     <a href="/testimonials" class="orange-bevel-link" title="Hear From The Owners">Hear From The Owners</a>
-    <?php endif; ?>
+    <?php //endif; ?>
     </section>
   </main> 
   <div class="clearfix"></div>
