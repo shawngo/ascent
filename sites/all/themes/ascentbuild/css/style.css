@@ -58,8 +58,11 @@ h1 a, h2 a, h3 a, h4 a, h5 a { font-weight: inherit; text-decoration: none; }
 p { margin: 0 0 10px 0; }
 
 blockquote {
-margin-bottom: 40px;
+/*border-bottom: 1px solid #A78D07; */
+margin-bottom: 20px;
 margin-top: 20px;
+padding-bottom: 10px;
+background: url(http://ascentbuild.cidesigninc.com/sites/all/themes/ascentbuild/images/h1-left-bg.png) bottom left no-repeat, url(http://ascentbuild.cidesigninc.com/sites/all/themes/ascentbuild/images/h1-right-bg.png) bottom right no-repeat;
 }
 main#info-description .testimonial-author {
 text-align: right;
@@ -977,7 +980,7 @@ main.home-details section#home-features ul li {
 main.home-details section#home-features ul:first-child {	
 	background: transparent url("/sites/all/themes/ascentbuild/images/shadow-top.png") no-repeat center top; }
 
-main.home-details section#home-features a.orange-bevel-link {
+a.orange-bevel-link {
 	background: transparent url("/sites/all/themes/ascentbuild/images/buttons.png") no-repeat right -172px;
 	color: #fff;
 	display: block;
@@ -989,7 +992,18 @@ main.home-details section#home-features a.orange-bevel-link {
 	margin: 0px 0px 0px 65px;
 	width: auto;
 	position: relative;
-	float: left; }	
+  }
+
+
+.block a.orange-bevel-link {
+width: 185px;
+margin-left: 30px;
+}
+
+main.home-details section#home-features a.orange-bevel-link {
+float: left;
+}
+
 
 /**
  * FEATURE HOMES PAGE STYLES
@@ -1020,6 +1034,9 @@ main#featured-homes article,
 	position: relative;
 	width: 475px;
  }
+main#featured-homes article {
+display: inline-block;
+}
 	
 main#featured-homes article:nth-child(odd),
 #featured-homes-gallery article:nth-child(odd),
@@ -1100,6 +1117,12 @@ main#featured-homes article p,
 /**
  * INFOMATION PAGE STYLES
  */
+
+main#info-description .content-image {}
+main#info-description .content-image a {border: none}
+main#info-description .content-image.right {float: right; margin: 0 0 1px 15px; }
+main#info-description .content-image.left {float: left; margin: 0 15px 1px 0;}
+
 
 #wrap.home .container .video-links-wrapper {
 	position: relative; 
@@ -1664,3 +1687,9 @@ float: left;
 width: 340px;
 clear: none;
 }
+
+.page-contact-us .region-content {
+width: 770px;
+margin: 0 auto;
+}
+
