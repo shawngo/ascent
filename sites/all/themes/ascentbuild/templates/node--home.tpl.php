@@ -151,9 +151,23 @@
     </h2>
   <?php endif; ?>
   <?php print render($title_suffix); ?>
-  
+
+ <?php
+   $featured = FALSE;
+   if ($node->field_progress) {
+     foreach ($node->field_progress[LANGUAGE_NONE] as $progress) {
+       if ($progress['value'] == 'Featured Homes') {
+         $featured = TRUE;
+       }
+     }
+   }
+  ?>
   <div class="bread-crumbs" id="home-details-breadcrumbs">
+  <?php if ($featured): ?>
     <a href="/featured-homes" id="featured-homes-breadcrumb">&laquo; Back To Featured Homes</a>
+  <?php else: ?>
+    <a href="/details-gallery" id="featured-homes-breadcrumb">&laquo; Back To Details Gallery</a>
+  <?php endif; ?>
     <?php  if ($next):
     $next_home = $next[0]->next_id;
     ?>
@@ -191,7 +205,7 @@
 	    $image		= image_style_url('home_details_large', $file->uri);
 	    $thumb		= image_style_url('home_details_thumb', $file->uri); 
 	    ?>
-	    <figure id="image<?php print $n; if($n == 1) { print ' class="active"'; } ?>" ><img src="<?php print $image; ?>" alt=""></figure>
+	    <figure id="image<?php print $n; ?>" <?php if($n == 1) { print ' class="active"'; } ?>" ><img src="<?php print $image; ?>" alt=""></figure>
 	    <?php
 		//if ($a == 1) { $next++; $prev++; }
 		if ($c == 1) { $class = 'thumb-link first'; } else { $class = 'thumb-link'; }
@@ -240,7 +254,9 @@
   <main class="home-details">
     <article id="home-description">
       <h2><?php print $node->title; ?></h2>
+      <?php if ($node->body): ?>
       <p><?php print $node->body['und'][0]['safe_value']; ?></p>
+      <?php endif; ?>
     <?php
       // We hide the comments and links now so that we can render them later.
       //hide($content['comments']);
