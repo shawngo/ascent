@@ -90,8 +90,13 @@
       ii.preventDefault();
     });
 	  
-    $('#home-details-slider a.thumb-link').live('click', function(hs){
+    var current_home_slide = '#image1';
+    $('#home-details-slider a.thumb-link').live('click mouseover', function(hs){
       var href = $(this).attr('href');
+      if (current_home_slide  == href) {
+        return;
+      }
+      current_home_slide = href+"";
       $('#home-details-slider figure[id!="'+$(href)+'"]').css('left', '-990px');
       $(href).addClass('active').animate({left: "0px",},{ duration: 250, queue: false });
       return false;
