@@ -1,0 +1,10 @@
+
+body main.home-details {
+margin: 0 auto;
+padding: 0px 15px 90px 30px;
+position: relative;
+width: 960px;
+clear: both; 
+border: 20px solid #f00;
+}
+

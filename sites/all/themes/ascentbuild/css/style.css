@@ -200,12 +200,17 @@ header #header-inner nav ul li a:hover span { color: #fff; }
  
 header #header-inner nav ul li a:hover,
 header #header-inner nav ul li a.active {
+background: #b8bbb4;
+}
+.cssgradients header #header-inner nav ul li a:hover,
+.cssgradients header #header-inner nav ul li a.active {
   background: -moz-linear-gradient(0deg, rgba(107,114,101,0.45) 0%, rgba(137,144,131,0.45) 100%);
   background: -webkit-linear-gradient(0deg, rgba(107,114,101,0.45) 0%, rgba(137,144,131,0.45) 100%);
   background: -ms-linear-gradient(0deg, rgba(107,114,101,0.45) 0%, rgba(137,144,131,0.45) 100%);
   background: -o-linear-gradient(0deg, rgba(107,114,101,0.45) 0%, rgba(137,144,131,0.45) 100%);
   background: linear-gradient(0deg, rgba(107,114,101,0.45) 0%, rgba(137,144,131,0.45) 100%); }
-  
+
+
 header #header-inner nav ul li.contact {
 	text-align: right;
 	background: none;
@@ -1034,6 +1039,10 @@ main#featured-homes article,
 	position: relative;
 	width: 475px;
  }
+
+.no-cssgradients .view-details-gallery #featured-homes article {
+width: auto;
+}
 main#featured-homes article {
 display: inline-block;
 }
@@ -1673,6 +1682,20 @@ width: 800px;
 .form-textarea-wrapper textarea {
 width: auto;
 }
+.no-cssgradients div.ctools-modal-content .form-textarea-wrapper textarea {
+clear: both;
+float: left;
+}
+div.ctools-modal-content .form-actions {
+clear: both;
+text-align: center;
+padding: 20px 0;
+}
+/*
+.no-cssgradient .form-textarea-wrapper textarea {
+width: 350px!important;
+}
+*/
 #modal-content .messages {
 margin: 30px 0 -15px 30px;
 }
@@ -1684,7 +1707,7 @@ padding-left: 30px;
 }
 #webform-component-additional-information {
 float: left;
-width: 340px;
+width: 320px;
 clear: none;
 }
 
