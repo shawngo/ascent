@@ -54,7 +54,7 @@
       <ul class="home-links">
         <li class="top-shadow"><a href="/featured-homes">Featured Homes of <?php print date('Y'); ?></a></li>
         <li class="middle"><a href="/featured-homes#homes-in-progress-details">Homes in Progress</a></li>
-        <li class="bottom-shadow"><a href="/homes/talus">Our Model Home</a></li>      	    
+        <li class="bottom-shadow"><a href="http://www.houzz.com/pro/ascent/ascent-llc">Visit us on Houzz</a></li>      	    
       </ul>
     </aside>      
     <div class="clearfix"></div>
