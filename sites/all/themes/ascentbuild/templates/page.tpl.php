@@ -5,7 +5,7 @@
   <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>" rel="home" id="logo"></a>
   <?php endif; ?>
   <?php /* <aside id="header-info">262.650.9705</aside> */ ?>
-  <aside id="header-info"><span class="phone">262.650.9705</span> <span class="houzz"><a href="http://www.houzz.com/pro/ascent/ascent-llc">Visit us on Houzz</a></aside>
+  <aside id="header-info"><span class="phone">262.650.9705</span> <span class="houzz"><a href="http://www.houzz.com/pro/ascent/ascent-llc" target="_blank">Visit us on Houzz</a></aside>
   <nav>
     <ul>
       <li class="why-ascent"><a href="/why-ascent" <?php 
